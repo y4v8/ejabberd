@@ -63,6 +63,7 @@ store_room(LServer, Host, Name, Opts) ->
                    "muc_room",
                    ["!name=%(Name)s",
                     "!host=%(Host)s",
+                    "server_host=%(LServer)s",
                     "opts=%(SOpts)s"])
 	end,
     ejabberd_sql:sql_transaction(LServer, F).
@@ -146,6 +147,7 @@ set_nick(LServer, Host, From, Nick) ->
                                   "muc_registered",
                                   ["!jid=%(JID)s",
                                    "!host=%(Host)s",
+                                   "server_host=%(LServer)s",
                                    "nick=%(Nick)s"]),
 				ok;
 			   true ->
@@ -177,6 +179,7 @@ register_online_room(ServerHost, Room, Host, Pid) ->
 		     "muc_online_room",
 		     ["!name=%(Room)s",
 		      "!host=%(Host)s",
+                      "server_host=%(ServerHost)s",
 		      "node=%(NodeS)s",
 		      "pid=%(PidS)s"]) of
 	ok ->
@@ -251,6 +254,7 @@ register_online_user(ServerHost, {U, S, R}, Room, Host) ->
 		      "!resource=%(R)s",
 		      "!name=%(Room)s",
 		      "!host=%(Host)s",
+                      "server_host=%(ServerHost)s",
 		      "node=%(NodeS)s"]) of
 	ok ->
 	    ok;
@@ -299,9 +303,12 @@ export(_Server) ->
                       SOpts = misc:term_to_expr(Opts),
                       [?SQL("delete from muc_room where name=%(Name)s"
                             " and host=%(RoomHost)s;"),
-                       ?SQL("insert into muc_room(name, host, opts) "
-                            "values ("
-                            "%(Name)s, %(RoomHost)s, %(SOpts)s);")];
+                       ?SQL_INSERT(
+                          "muc_room",
+                          ["name=%(Name)s",
+                           "host=%(Host)s",
+                           "server_host=%(Host)s",
+                           "opts=%(SOpts)s"])];
                   false ->
                       []
               end
@@ -314,9 +321,12 @@ export(_Server) ->
                       SJID = jid:encode(jid:make(U, S)),
                       [?SQL("delete from muc_registered where"
                             " jid=%(SJID)s and host=%(RoomHost)s;"),
-                       ?SQL("insert into muc_registered(jid, host, "
-                            "nick) values ("
-                            "%(SJID)s, %(RoomHost)s, %(Nick)s);")];
+                       ?SQL_INSERT(
+                          "muc_registered",
+                          ["jid=%(SJID)s",
+                           "host=%(Host)s",
+                           "server_host=%(Host)s",
+                           "nick=%(Nick)s"])];
                   false ->
                       []
               end

@@ -275,20 +275,27 @@ export(_Server) ->
       fun(Host, #passwd{us = {LUser, LServer}, password = Password})
             when LServer == Host,
                  is_binary(Password) ->
-              [?SQL("delete from users where username=%(LUser)s;"),
-               ?SQL("insert into users(username, password) "
-                    "values (%(LUser)s, %(Password)s);")];
+              [?SQL("delete from users where username=%(LUser)s and %(LServer)H;"),
+               ?SQL_INSERT(
+                  "users",
+                  ["username=%(LUser)s",
+                   "server_host=%(LServer)s",
+                   "password=%(Password)s"])];
          (Host, #passwd{us = {LUser, LServer}, password = #scram{} = Scram})
             when LServer == Host ->
               StoredKey = Scram#scram.storedkey,
               ServerKey = Scram#scram.serverkey,
               Salt = Scram#scram.salt,
               IterationCount = Scram#scram.iterationcount,
-              [?SQL("delete from users where username=%(LUser)s;"),
-               ?SQL("insert into users(username, password, serverkey, salt, "
-                    "iterationcount) "
-                    "values (%(LUser)s, %(StoredKey)s, %(ServerKey)s,"
-                    " %(Salt)s, %(IterationCount)d);")];
+              [?SQL("delete from users where username=%(LUser)s and %(LServer)H;"),
+               ?SQL_INSERT(
+                  "users",
+                  ["username=%(LUser)s",
+                   "server_host=%(LServer)s",
+                   "password=%(StoredKey)s",
+                   "serverkey=%(ServerKey)s",
+                   "salt=%(Salt)s",
+                   "iterationcount=%(IterationCount)d"])];
          (_Host, _R) ->
               []
       end}].
