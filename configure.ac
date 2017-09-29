@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
-AC_INIT(ejabberd, m4_esyscmd([echo `git describe --tags 2>/dev/null || echo 0.0` | sed 's/-g.*//;s/-/./' | tr -d '\012']), [ejabberd@process-one.net], [ejabberd])
+AC_INIT(ejabberd, 17.08, ejabberd@process-one.net, ejabberd)
 REQUIRE_ERLANG_MIN="6.4 (Erlang/OTP 17.5)"
 REQUIRE_ERLANG_MAX="100.0.0 (No Max)"
 
@@ -101,10 +101,10 @@ AC_ARG_ENABLE(mssql,
 esac],[db_type=generic])
 
 AC_ARG_ENABLE(all,
-[AC_HELP_STRING([--enable-all], [same as --enable-odbc --enable-mysql --enable-pgsql --enable-sqlite --enable-pam --enable-zlib --enable-riak --enable-redis --enable-elixir --enable-iconv --enable-stun --enable-sip --enable-debug --enable-tools (useful for Dialyzer checks, default: no)])],
+[AC_HELP_STRING([--enable-all], [same as --enable-odbc --enable-mysql --enable-pgsql --enable-sqlite --enable-pam --enable-zlib --enable-riak --enable-redis --enable-elixir --enable-esmb --enable-iconv --enable-stun --enable-sip --enable-debug --enable-tools (useful for Dialyzer checks, default: no)])],
 [case "${enableval}" in
-  yes) odbc=true mysql=true pgsql=true sqlite=true pam=true zlib=true riak=true redis=true elixir=true iconv=true stun=true sip=true debug=true tools=true ;;
-  no) odbc=false mysql=false pgsql=false sqlite=false pam=false zlib=false riak=false redis=false elixir=false iconv=false stun=false sip=false debug=false tools=false ;;
+  yes) odbc=true mysql=true pgsql=true sqlite=true pam=true zlib=true riak=true redis=true elixir=true esmb=true iconv=true stun=true sip=true debug=true tools=true ;;
+  no) odbc=false mysql=false pgsql=false sqlite=false pam=false zlib=false riak=false redis=false elixir=false esmb=true iconv=false stun=false sip=false debug=false tools=false ;;
   *) AC_MSG_ERROR(bad value ${enableval} for --enable-all) ;;
 esac],[])
 
@@ -187,6 +187,14 @@ AC_ARG_ENABLE(elixir,
   no)  elixir=false ;;
   *) AC_MSG_ERROR(bad value ${enableval} for --enable-elixir) ;;
 esac],[if test "x$elixir" = "x"; then elixir=false; fi])
+
+AC_ARG_ENABLE(esmb,
+[AC_HELP_STRING([--enable-esmb], [enable esmb support (default: yes)])],
+[case "${enableval}" in
+  yes) esmb=true ;;
+  no)  esmb=false ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-esmb) ;;
+esac],[if test "x$esmb" = "x"; then esmb=true; fi])
 
 AC_ARG_ENABLE(iconv,
 [AC_HELP_STRING([--enable-iconv], [enable iconv support (default: yes)])],
@@ -276,6 +284,7 @@ AC_SUBST(zlib)
 AC_SUBST(riak)
 AC_SUBST(redis)
 AC_SUBST(elixir)
+AC_SUBST(esmb)
 AC_SUBST(iconv)
 AC_SUBST(stun)
 AC_SUBST(sip)

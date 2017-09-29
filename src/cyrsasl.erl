@@ -60,7 +60,8 @@
 -type(sasl_mechanism() :: #sasl_mechanism{}).
 -type error_reason() :: cyrsasl_digest:error_reason() |
 			cyrsasl_oauth:error_reason() |
-			cyrsasl_plain:error_reason() |
+			cyrsasl_ntlm:error_reason() |
+            cyrsasl_plain:error_reason() |
 			cyrsasl_scram:error_reason() |
 			unsupported_mechanism | nodeprep_failed |
 			empty_username | aborted.
@@ -92,6 +93,7 @@ init([]) ->
     ets:new(sasl_mechanism,
 	    [named_table, public,
 	     {keypos, #sasl_mechanism.mechanism}]),
+    cyrsasl_ntlm:start([]),
     cyrsasl_plain:start([]),
     cyrsasl_digest:start([]),
     cyrsasl_scram:start([]),
@@ -110,6 +112,7 @@ handle_info(_Info, State) ->
     {noreply, State}.
 
 terminate(_Reason, _State) ->
+    cyrsasl_ntlm:stop(),
     cyrsasl_plain:stop(),
     cyrsasl_digest:stop(),
     cyrsasl_scram:stop(),
